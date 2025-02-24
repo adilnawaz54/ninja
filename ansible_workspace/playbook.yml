@@ -1,0 +1,8 @@
+---
+- name: Install Elasticsearch using Role
+  hosts: webserver
+  become: yes
+  gather_facts: false
+  roles:
+    - elasticsearch
+

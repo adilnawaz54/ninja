@@ -1,0 +1,6 @@
+# vars file for elasticsearch
+#
+---
+elasticsearch_version: "8.x"
+elasticsearch_repo_url: "https://artifacts.elastic.co/packages/{{ elasticsearch_version }}/apt"
+

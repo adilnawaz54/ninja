@@ -1,0 +1,12 @@
+---
+- name: Start Elasticsearch
+  systemd:
+    name: elasticsearch
+    state: started
+
+- name: Enable Elasticsearch
+  systemd:
+    name: elasticsearch
+    enabled: yes
+
+# handlers file for elasticsearch

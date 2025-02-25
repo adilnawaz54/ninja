@@ -1,0 +1,54 @@
+---
+- name: Install Elasticsearch on Ubuntu
+  hosts: localhost
+  become: yes
+  gather_facts: false
+
+  tasks:
+    - name: Update apt repo and cache
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - openjdk-17-jdk
+          - wget
+          - nginx
+          - vim
+        state: present
+
+    - name: Import Elasticsearch GPG key
+      apt_key:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        keyring: /usr/share/keyrings/elasticsearch-keyring.gpg
+        state: present
+
+    - name: Add Elasticsearch repository
+      lineinfile:
+        path: /etc/apt/sources.list.d/elastic-8.x.list
+        line: "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main"
+        create: yes
+
+    - name: Install Elasticsearch
+      apt:
+        name: elasticsearch
+        state: present
+        update_cache: yes
+      notify:
+        - Start Elasticsearch
+        - Enable Elasticsearch
+
+  handlers:
+    - name: Start Elasticsearch
+      systemd:
+        name: elasticsearch
+        state: started
+
+    - name: Enable Elasticsearch
+      systemd:
+        name: elasticsearch
+        enabled: yes
+

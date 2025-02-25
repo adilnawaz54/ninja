@@ -24,6 +24,14 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 }
 
+terraform {
+  backend "s3" {
+    bucket         = "tf-bucket-009"
+    key            = "my-terraform-project"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-locks"
+  }
+}
 
 resource "aws_vpc" "main_vpc" {
   cidr_block           = "10.0.0.0/16"

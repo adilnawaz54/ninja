@@ -1,0 +1,38 @@
+@Library('Ansible_Role_CI') _
+
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'URL', defaultValue: 'git@github.com:MyGurukulam-p11/DevOps-Repo.git', description: 'Git Repository URL')
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    checkout([$class: 'GitSCM', 
+                        branches: [[name: "${params.BRANCH}"]],
+                        userRemoteConfigs: [[
+                            url: "${params.URL}",
+                            credentialsId: 'amit-creds'
+                        ]]
+                    ])
+                }
+            }
+        }
+    
+        stage('Run Ansible') {
+            steps {
+                script {
+                    def ansibleCI = new org.p11combinedforce.template.ansibleCI.ansibleCI()
+                    ansibleCI.call(params.URL, 
+                                   params.BRANCH, 
+                                   'amit-creds', 
+                                   'Ansible/Grafana_role/Grafana/tasks/main.yml')
+                }
+            }
+        }
+    }
+}

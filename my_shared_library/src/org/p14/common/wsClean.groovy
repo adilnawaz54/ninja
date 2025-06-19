@@ -1,4 +1,4 @@
-package org.p11combinedforce.common
+package org.p14.common
 
 def call() {
   stage('Clean Workspace'){

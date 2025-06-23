@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     tools {
+        git '2.34.1'
         terraform 'tf 1.12'  // 👈 Must match the name in Jenkins > Global Tool Configuration
-        git 'default'
+        
     }
 
     environment {

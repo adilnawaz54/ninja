@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     tools {
-        
-        terraform 'tf 1.12'  
-        
+        terraform 'tf 1.12'  // Make sure this matches the tool name in Jenkins
     }
 
     environment {
@@ -46,6 +44,7 @@ pipeline {
                                 terraform -version
 
                                 echo "🚀 Initializing Terraform..."
+                                cd terraform-drift
                                 terraform init -input=false
 
                                 echo "🔍 Running Terraform Plan for Drift Detection..."

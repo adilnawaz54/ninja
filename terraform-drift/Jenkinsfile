@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        terraform 'tf 1.12'  // 👈 Reference name from Jenkins Global Tool Config
+        terraform 'tf 1.12'  // 👈 Must match the name in Jenkins > Global Tool Configuration
     }
 
     environment {
@@ -10,9 +10,18 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clean Workspace') {
             steps {
-                git url: 'https://github.com/your-org/terraform-drift-demo.git', branch: 'main'
+                echo "🧹 Cleaning workspace..."
+                deleteDir()
+            }
+        }
+
+        stage('Checkout Code from GitHub') {
+            steps {
+                git url: 'https://github.com/adilnawaz54/ninja.git',
+                    credentialsId: 'github54-token',
+                    branch: 'main'
             }
         }
 
@@ -26,24 +35,30 @@ pipeline {
                             passwordVariable: 'SECRET_KEY'
                         )
                     ]) {
-                        // Export credentials to environment
                         env.AWS_ACCESS_KEY_ID = "${ACCESS_KEY}"
                         env.AWS_SECRET_ACCESS_KEY = "${SECRET_KEY}"
 
-                        // Terraform commands
-                        def code = sh(script: '''
-                            terraform -version
-                            terraform init -input=false
-                            terraform plan -detailed-exitcode
-                        ''', returnStatus: true)
+                        def exitCode = sh(
+                            script: '''
+                                echo "🔧 Terraform Version:"
+                                terraform -version
 
-                        if (code == 0) {
+                                echo "🚀 Initializing Terraform..."
+                                terraform init -input=false
+
+                                echo "🔍 Running Terraform Plan for Drift Detection..."
+                                terraform plan -detailed-exitcode
+                            ''',
+                            returnStatus: true
+                        )
+
+                        if (exitCode == 0) {
                             echo "✅ No drift detected."
-                        } else if (code == 2) {
+                        } else if (exitCode == 2) {
                             echo "⚠️ Drift detected!"
                             currentBuild.result = 'UNSTABLE'
                         } else {
-                            error("❌ Terraform plan failed.")
+                            error("❌ Terraform plan failed (exit code: ${exitCode})")
                         }
                     }
                 }
@@ -57,6 +72,9 @@ pipeline {
         }
         unstable {
             echo "⚠️ Drift detected! Marking build as unstable."
+        }
+        success {
+            echo "✅ Build succeeded and no drift was detected."
         }
     }
 }

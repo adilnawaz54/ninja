@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "tfstate-bucket54"
+    bucket         = "tfstate-bucket-54"
     key            = "terraform-drift-demo/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true

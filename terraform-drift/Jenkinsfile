@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        terraform 'tf 1.12'  // Make sure this matches the tool name in Jenkins
+        terraform 'tf 1.12'
     }
 
     environment {
@@ -40,11 +40,11 @@ pipeline {
 
                         def exitCode = sh(
                             script: '''
+                                cd terraform-drift
                                 echo "🔧 Terraform Version:"
                                 terraform -version
 
                                 echo "🚀 Initializing Terraform..."
-                                cd terraform-drift
                                 terraform init -input=false
 
                                 echo "🔍 Running Terraform Plan for Drift Detection..."
@@ -63,6 +63,19 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+
+        stage('Terraform Apply') {
+            when {
+                expression { return currentBuild.result == 'UNSTABLE' }
+            }
+            steps {
+                input message: "⚠️ Drift detected. Do you want to apply these changes?"
+                sh '''
+                    cd terraform-drift
+                    terraform apply -auto-approve
+                '''
             }
         }
     }

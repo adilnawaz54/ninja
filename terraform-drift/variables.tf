@@ -13,7 +13,7 @@ variable "ami_id" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t2.medium"
+  default     = "t2.micro"
 }
 
 variable "key_name" {
@@ -25,5 +25,5 @@ variable "key_name" {
 variable "volume_size" {
   description = "Root EBS volume size in GB"
   type        = number
-  default     = 20
+  default     = 8
 }

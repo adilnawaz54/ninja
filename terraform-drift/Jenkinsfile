@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/your-org/terraform-drift-demo.git', branch: 'main'
+                git url: 'https://github.com/adilnawaz54/ninja.git', branch: 'main'
             }
         }
 

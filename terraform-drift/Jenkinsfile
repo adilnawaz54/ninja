@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        terraform 'tf 1.12'  // 👈 Reference name from Jenkins Global Tool Config
+    }
+
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
     }
@@ -8,14 +12,13 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/adilnawaz54/ninja.git', branch: 'main'
+                git url: 'https://github.com/your-org/terraform-drift-demo.git', branch: 'main'
             }
         }
 
         stage('Terraform Init & Drift Detection') {
             steps {
                 script {
-                    // Inject credentials from Jenkins credentials store
                     withCredentials([
                         usernamePassword(
                             credentialsId: 'aws-access-key-id',
@@ -23,17 +26,17 @@ pipeline {
                             passwordVariable: 'SECRET_KEY'
                         )
                     ]) {
-                        // Set the environment variables for Terraform to use
+                        // Export credentials to environment
                         env.AWS_ACCESS_KEY_ID = "${ACCESS_KEY}"
                         env.AWS_SECRET_ACCESS_KEY = "${SECRET_KEY}"
 
-                        // Run Terraform commands
+                        // Terraform commands
                         def code = sh(script: '''
+                            terraform -version
                             terraform init -input=false
                             terraform plan -detailed-exitcode
-                            ''', returnStatus: true)
+                        ''', returnStatus: true)
 
-                        // Analyze exit code
                         if (code == 0) {
                             echo "✅ No drift detected."
                         } else if (code == 2) {

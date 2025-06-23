@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/your-org/terraform-drift-demo.git', branch: 'main'
+            }
+        }
+
+        stage('Terraform Init & Drift Detection') {
+            steps {
+                script {
+                    // Inject credentials from Jenkins credentials store
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'aws-access-key-id',
+                            usernameVariable: 'ACCESS_KEY',
+                            passwordVariable: 'SECRET_KEY'
+                        )
+                    ]) {
+                        // Set the environment variables for Terraform to use
+                        env.AWS_ACCESS_KEY_ID = "${ACCESS_KEY}"
+                        env.AWS_SECRET_ACCESS_KEY = "${SECRET_KEY}"
+
+                        // Run Terraform commands
+                        def code = sh(script: '''
+                            terraform init -input=false
+                            terraform plan -detailed-exitcode
+                            ''', returnStatus: true)
+
+                        // Analyze exit code
+                        if (code == 0) {
+                            echo "✅ No drift detected."
+                        } else if (code == 2) {
+                            echo "⚠️ Drift detected!"
+                            currentBuild.result = 'UNSTABLE'
+                        } else {
+                            error("❌ Terraform plan failed.")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "❌ Build failed."
+        }
+        unstable {
+            echo "⚠️ Drift detected! Marking build as unstable."
+        }
+    }
+}

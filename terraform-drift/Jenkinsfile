@@ -41,10 +41,10 @@ pipeline {
                         def exitCode = sh(
                             script: '''
                                 cd terraform-drift
-                                echo "🔧 Terraform Version:"
+                                echo " Terraform Version:"
                                 terraform -version
 
-                                echo "🚀 Initializing Terraform..."
+                                echo " Initializing Terraform..."
                                 terraform init -input=false
 
                                 echo "🔍 Running Terraform Plan for Drift Detection..."
@@ -54,12 +54,12 @@ pipeline {
                         )
 
                         if (exitCode == 0) {
-                            echo "✅ No drift detected."
+                            echo " No drift detected."
                         } else if (exitCode == 2) {
-                            echo "⚠️ Drift detected!"
+                            echo " Drift detected!"
                             currentBuild.result = 'UNSTABLE'
                         } else {
-                            error("❌ Terraform plan failed (exit code: ${exitCode})")
+                            error(" Terraform plan failed (exit code: ${exitCode})")
                         }
                     }
                 }
@@ -71,7 +71,7 @@ pipeline {
                 expression { return currentBuild.result == 'UNSTABLE' }
             }
             steps {
-                input message: "⚠️ Drift detected. Do you want to apply these changes?"
+                input message: " Drift detected. Do you want to apply these changes?"
                 sh '''
                     cd terraform-drift
                     terraform apply -auto-approve
@@ -82,13 +82,13 @@ pipeline {
 
     post {
         failure {
-            echo "❌ Build failed."
+            echo " Build failed."
         }
         unstable {
-            echo "⚠️ Drift detected! Marking build as unstable."
+            echo " Drift detected! Marking build as unstable."
         }
         success {
-            echo "✅ Build succeeded and no drift was detected."
+            echo " Build succeeded and no drift was detected."
         }
     }
 }

@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
-                echo "🧹 Cleaning workspace..."
+                echo " Cleaning workspace..."
                 deleteDir()
             }
         }

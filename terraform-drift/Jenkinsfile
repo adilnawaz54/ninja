@@ -47,7 +47,7 @@ pipeline {
                                 echo " Initializing Terraform..."
                                 terraform init -input=false
 
-                                echo "🔍 Running Terraform Plan for Drift Detection..."
+                                echo " Running Terraform Plan for Drift Detection..."
                                 terraform plan -detailed-exitcode
                             ''',
                             returnStatus: true
@@ -71,7 +71,7 @@ pipeline {
                 expression { return currentBuild.result == 'UNSTABLE' }
             }
             steps {
-                input message: " Drift detected. Do you want to apply these changes?"
+                input message: " ⚠️ Drift detected. Do you want to apply these changes?"
                 sh '''
                     cd terraform-drift
                     terraform apply -auto-approve
